@@ -3,18 +3,13 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: ${MYSQL_URL}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${PSQL_URL}
+    username: ${PSQL_USERNAME}
+    password: ${PSQL_PASSWORD}
 
   jpa:
     open-in-view: false
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
-
-    properties:
-      hibernate:
-        format_sql: true
-        default_batch_fetch_size: 100
-        dialect: org.hibernate.dialect.MySQL8Dialect
+      ddl-auto: create
