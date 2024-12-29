@@ -19,7 +19,7 @@ public class UsersController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
-        usersService.insertTestUser(req);
+        usersService.register(req);
         return ApiResponse.CREATED();
     }
 }

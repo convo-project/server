@@ -25,7 +25,7 @@ public class Users extends BaseEntity {
     private String email;
 
     @Column(length = 100, nullable = false)
-    private String password;
+    private String encryptedPassword;
 
     @Column(length = 20, nullable = false)
     private String nickname;

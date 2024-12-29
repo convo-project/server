@@ -7,11 +7,11 @@ public record RegisterRequest(
         String password,
         String nickname
 ) {
-    public Users toEntity() {
+    public Users toEntity(String encryptedPassword) {
         return Users.builder()
-                .nickname(this.nickname)
-                .email(this.email)
-                .password(this.password)
+                .nickname(nickname)
+                .email(email)
+                .encryptedPassword(encryptedPassword)
                 .build();
     }
 }
