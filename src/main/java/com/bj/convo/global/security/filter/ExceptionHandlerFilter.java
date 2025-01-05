@@ -2,6 +2,9 @@ package com.bj.convo.global.security.filter;
 
 import com.bj.convo.global.util.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +25,11 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             filterChain.doFilter(request, response);
-        } catch (HttpRequestMethodNotSupportedException e) {
+        } catch (HttpRequestMethodNotSupportedException
+                 | MalformedJwtException
+                 | ExpiredJwtException
+                 | SignatureException
+                e) {
             setErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request, response);
         }
     }
