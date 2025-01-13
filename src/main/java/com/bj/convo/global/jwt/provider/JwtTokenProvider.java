@@ -1,16 +1,19 @@
 package com.bj.convo.global.jwt.provider;
 
 import com.bj.convo.global.jwt.model.JwtToken;
+import com.bj.convo.global.security.exception.SecurityErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.security.sasl.AuthenticationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -45,30 +48,46 @@ public class JwtTokenProvider {
 
     private String generateAccessToken(Long userId) {
         return Jwts.builder()
-                .claim("uid", userId)
+                .subject(userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiredTime))
+                .claim("token_type", "access token")
                 .signWith(key)
                 .compact();
     }
 
     private String generateRefreshToken(Long userId) {
         return Jwts.builder()
-                .claim("uid", userId)
+                .subject(userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiredTime))
+                .claim("token_type", "refresh token")
                 .signWith(key)
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        return true;
-        // 만료
-        // 올바른
+    public Long getSubject(String token) {
+        return Long.parseLong(jwtParser.parseSignedClaims(token).getPayload().getSubject());
     }
 
-    public void getToken(String accessToken) {
-        String payload = jwtParser.parse(accessToken).getPayload().toString();
-        log.warn(payload);
+    public boolean validateToken(String token) throws AuthenticationException {
+        try {
+            jwtParser.parse(token);
+            return true;
+        } catch (Exception e) {
+            if (e instanceof SignatureException) {
+                log.error(SecurityErrorCode.SIGNATURE_FAILED_TOKEN.getMessage());
+                throw new AuthenticationException(SecurityErrorCode.SIGNATURE_FAILED_TOKEN.getMessage());
+            } else if (e instanceof ExpiredJwtException) {
+                log.error(SecurityErrorCode.EXPIRED_TOKEN.getMessage());
+                throw new AuthenticationException(SecurityErrorCode.EXPIRED_TOKEN.getMessage());
+            } else if (e instanceof MalformedJwtException) {
+                log.error(SecurityErrorCode.MALFORMED_TOKEN.getMessage());
+                throw new AuthenticationException(SecurityErrorCode.MALFORMED_TOKEN.getMessage());
+            } else {
+                log.error(SecurityErrorCode.UNKNOWN_TOKEN_ERROR.getMessage());
+                throw new AuthenticationException(SecurityErrorCode.UNKNOWN_TOKEN_ERROR.getMessage());
+            }
+        }
     }
 }

@@ -10,11 +10,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import javax.security.sasl.AuthenticationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
@@ -24,13 +27,19 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
+            log.info("시작!!!!");
             filterChain.doFilter(request, response);
+            log.info("종료!!!!");
         } catch (HttpRequestMethodNotSupportedException
                  | MalformedJwtException
                  | ExpiredJwtException
                  | SignatureException
                 e) {
             setErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request, response);
+            return;
+        } catch (AuthenticationException e) {
+            setErrorResponse(HttpStatus.UNAUTHORIZED, e.getMessage(), request, response);
+            return;
         }
     }
 
@@ -45,5 +54,6 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
                 .build();
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        response.flushBuffer();
     }
 }

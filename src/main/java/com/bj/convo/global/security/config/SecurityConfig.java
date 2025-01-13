@@ -1,9 +1,20 @@
 package com.bj.convo.global.security.config;
 
+import com.bj.convo.domain.user.repository.UsersRepository;
+import com.bj.convo.global.security.filter.ExceptionHandlerFilter;
+import com.bj.convo.global.security.filter.JwtFilter;
+import com.bj.convo.global.security.filter.UsernamePasswordFilter;
+import com.bj.convo.global.jwt.provider.JwtTokenProvider;
+import com.bj.convo.global.security.service.UserDetailsServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -11,10 +22,46 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final ObjectMapper objectMapper;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UsersRepository usersRepository;
+
+    public final static String[] allowedUrls = {
+            "/api/user/register",
+            "/api/user/login",
+            "/error",
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs"
+    };
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(allowedUrls).permitAll()// 임시
+                        .anyRequest().authenticated()
+                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .addFilterBefore(exceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(usernamePasswordLoginFilter(), ExceptionHandlerFilter.class)
+                .addFilterAfter(jwtFilter(), UsernamePasswordFilter.class)
+        ;
+
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -23,17 +70,39 @@ public class SecurityConfig {
         return new DelegatingPasswordEncoder("bcrypt", encoders);
     }
 
+    @Bean
+    public UsernamePasswordFilter usernamePasswordLoginFilter() throws Exception {
+        UsernamePasswordFilter usernamePasswordFilter = new UsernamePasswordFilter(
+                authenticationManager(), objectMapper, jwtTokenProvider);
+        usernamePasswordFilter.setAuthenticationManager(authenticationManager());
+        return usernamePasswordFilter;
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable);
+    public ExceptionHandlerFilter exceptionHandlerFilter() throws Exception {
+        return new ExceptionHandlerFilter(objectMapper);
+    }
 
-        return http.build();
+    @Bean
+    public JwtFilter jwtFilter() throws Exception {
+        return new JwtFilter(jwtTokenProvider, usersRepository);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() throws Exception {//AuthenticationManager 등록
+        DaoAuthenticationProvider provider = daoAuthenticationProvider();//DaoAuthenticationProvider 사용
+        provider.setPasswordEncoder(
+                passwordEncoder());//PasswordEncoder로는 PasswordEncoderFactories.createDelegatingPasswordEncoder() 사용
+        return new ProviderManager(provider);
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() throws Exception {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+
+        return daoAuthenticationProvider;
     }
 }
