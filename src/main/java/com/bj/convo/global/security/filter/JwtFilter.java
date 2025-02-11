@@ -50,11 +50,11 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             if (StringUtils.hasText(token) || jwtTokenProvider.validateToken(token)) {
                 forceAuthentication(token);
-                filterChain.doFilter(request, response);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+        filterChain.doFilter(request, response);
     }
 
     private String resolveBearerToken(HttpServletRequest request) throws AuthenticationException {

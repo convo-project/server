@@ -6,13 +6,15 @@ spring:
     url: ${PSQL_URL}
     username: ${PSQL_USERNAME}
     password: ${PSQL_PASSWORD}
+  security:
+    debug: true
 
   jpa:
     open-in-view: false
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
 
   jwt:
     secret: ${JWT_KEY}

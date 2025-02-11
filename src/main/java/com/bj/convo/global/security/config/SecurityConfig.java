@@ -1,6 +1,7 @@
 package com.bj.convo.global.security.config;
 
 import com.bj.convo.domain.user.repository.UsersRepository;
+import com.bj.convo.global.security.exception.CustomAuthenticationEntryPoint;
 import com.bj.convo.global.security.filter.ExceptionHandlerFilter;
 import com.bj.convo.global.security.filter.JwtFilter;
 import com.bj.convo.global.security.filter.UsernamePasswordFilter;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +19,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
@@ -45,6 +48,9 @@ public class SecurityConfig {
             "/v3/api-docs"
     };
 
+    @Value("${spring.security.debug:false}")
+    boolean isSecurityDebug;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -58,9 +64,21 @@ public class SecurityConfig {
                 .addFilterBefore(exceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(usernamePasswordLoginFilter(), ExceptionHandlerFilter.class)
                 .addFilterAfter(jwtFilter(), UsernamePasswordFilter.class)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(customAuthenticationEntryPoint()))
         ;
 
         return http.build();
+    }
+
+    @Bean
+    public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint(objectMapper);
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.debug(isSecurityDebug);
     }
 
     @Bean
@@ -89,20 +107,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() throws Exception {//AuthenticationManager 등록
-        DaoAuthenticationProvider provider = daoAuthenticationProvider();//DaoAuthenticationProvider 사용
-        provider.setPasswordEncoder(
-                passwordEncoder());//PasswordEncoder로는 PasswordEncoderFactories.createDelegatingPasswordEncoder() 사용
+    public AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
         return new ProviderManager(provider);
-    }
-
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() throws Exception {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-
-        return daoAuthenticationProvider;
     }
 }

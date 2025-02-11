@@ -27,19 +27,10 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            log.info("시작!!!!");
-            filterChain.doFilter(request, response);
-            log.info("종료!!!!");
-        } catch (HttpRequestMethodNotSupportedException
-                 | MalformedJwtException
-                 | ExpiredJwtException
-                 | SignatureException
-                e) {
-            setErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request, response);
-            return;
-        } catch (AuthenticationException e) {
-            setErrorResponse(HttpStatus.UNAUTHORIZED, e.getMessage(), request, response);
-            return;
+            filterChain.doFilter(request, response);  // 다음 필터로 요청 전달
+        } catch (Exception e) {  // 최상위 예외를 추가로 처리
+            log.error("알 수 없는 예외 발생: {}", e.getMessage(), e);
+            setErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", request, response);
         }
     }
 

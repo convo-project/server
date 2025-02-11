@@ -95,14 +95,14 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed) throws IOException, ServletException {
-            ErrorResponse error = ErrorResponse.builder()
-                    .code(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                    .message(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getMessage())
-                    .build();
-
-            response.setStatus(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getHttpStatus().value());
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(objectMapper.writeValueAsString(error));
+        ErrorResponse error = ErrorResponse.builder()
+                .code(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .message(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getMessage())
+                .build();
+        log.error("로그인 실패");
+        response.setStatus(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getHttpStatus().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(error));
     }
 }
