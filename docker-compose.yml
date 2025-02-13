@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+  redis:
+    container_name: redis
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - ~/Desktop/redis/data/:/data
+  spring:
+    container_name: convo
+    image: qudwns017/convo
+    ports:
+      - 8090:8090
+    volumes:
+      - /var/log/:/logs/
+    depends_on:
+      - redis

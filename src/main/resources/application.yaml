@@ -1,3 +1,5 @@
 spring:
   profiles:
     default: ${DEPLOYMENT_ENVIRONMENT}
+server:
+  port: 8090
