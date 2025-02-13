@@ -20,3 +20,11 @@ spring:
     secret: ${JWT_KEY}
     access-expired-time: ${JWT_ACCESS_EXPIRED_TIME}
     refresh-expired-time: ${JWT_REFRESH_EXPIRED_TIME}
+
+logging:
+  level:
+    org:
+      springframework: debug
+    com:
+      bj:
+        convo: debug
