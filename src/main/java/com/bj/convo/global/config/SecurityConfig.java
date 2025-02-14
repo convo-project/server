@@ -1,4 +1,4 @@
-package com.bj.convo.global.security.config;
+package com.bj.convo.global.config;
 
 import com.bj.convo.domain.user.repository.UsersRepository;
 import com.bj.convo.global.security.exception.CustomAuthenticationEntryPoint;
@@ -26,7 +26,6 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -41,6 +40,8 @@ public class SecurityConfig {
     public final static String[] allowedUrls = {
             "/api/user/register",
             "/api/user/login",
+            "/api/user/email-verification",
+            "/api/user/email-verification/confirm",
             "/error",
             "/swagger-resources/**",
             "/swagger-ui/**",
