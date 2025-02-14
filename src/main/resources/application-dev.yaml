@@ -2,10 +2,12 @@ spring:
   config:
     activate:
       on-profile: dev
+
   datasource:
     url: ${PSQL_URL}
     username: ${PSQL_USERNAME}
     password: ${PSQL_PASSWORD}
+
   security:
     debug: true
 
@@ -15,6 +17,12 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
 
   jwt:
     secret: ${JWT_KEY}
@@ -36,8 +44,6 @@ spring:
           connectiontimeout: 5000 # 클라이언트가 SMTP 서버와의 연결을 설정하는 데 대기해야 하는 시간
           timeout: 5000 # 클라이언트가 SMTP 서버로부터 응답을 대기해야 하는 시간
           writetimeout: 5000 # 클라이언트가 작업을 완료하는데 대기해야 하는 시간
-    auth-code-expiration-millis: 300000  # 30 * 1000 == 30분 이메일 인증 코드의 만료 시간(Millisecond)
-
 
 logging:
   level:
