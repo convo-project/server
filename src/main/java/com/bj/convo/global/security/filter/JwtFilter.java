@@ -4,8 +4,7 @@ import com.bj.convo.domain.user.exception.UsersErrorCode;
 import com.bj.convo.domain.user.model.entity.Users;
 import com.bj.convo.domain.user.repository.UsersRepository;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
-import com.bj.convo.global.security.config.SecurityConfig;
-import com.bj.convo.global.security.exception.SecurityErrorCode;
+import com.bj.convo.global.config.SecurityConfig;
 import com.bj.convo.global.security.service.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
