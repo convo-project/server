@@ -1,14 +1,16 @@
 services:
+
   redis:
     container_name: redis
     image: redis:alpine
-    ports:
-      - 6379:6379
     volumes:
       - /etc/redis.conf:/etc/redis.conf
       - redis-data:/data
     command: redis-server /etc/redis.conf
     restart: always
+    networks:
+      - internal_network
+
   spring:
     container_name: convo
     image: qudwns017/convo
@@ -19,21 +21,46 @@ services:
     depends_on:
       - redis
     restart: always
+    networks:
+      - internal_network
+
   postgres:
-    image: postgres:latest
+    image: postgres:alpine
     container_name: postgres
     environment:
       - POSTGRES_USER=${PSQL_USERNAME}
       - POSTGRES_PASSWORD=${PSQL_PASSWORD}
       - POSTGRES_DB=convo
-    ports:
-      - "5432:5432"
     restart: always
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal_network
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8080:8080
+    restart: always
+    networks:
+      - internal_network
+      - external_network
 
 volumes:
   redis-data:
     driver: local
   postgres-data:
     driver: local
+  jenkins_home:
+    external: true
+
+networks:
+  internal_network:
+    driver: bridge
+    internal: true
+  external_network:
+    driver: bridge
