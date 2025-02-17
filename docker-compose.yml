@@ -6,7 +6,7 @@ services:
     volumes:
       - /etc/redis.conf:/etc/redis.conf
       - redis-data:/data
-    command: redis-server /etc/redis.conf --requirepass ${REDIS_PASSWORD}
+    command: redis-server /etc/redis.conf
     restart: always
     networks:
       - internal_network
