@@ -6,7 +6,7 @@ services:
     volumes:
       - /etc/redis.conf:/etc/redis.conf
       - redis-data:/data
-    command: redis-server /etc/redis.conf
+    command: redis-server /etc/redis.conf --requirepass ${REDIS_PASSWORD}
     restart: always
     networks:
       - internal_network
@@ -23,6 +23,7 @@ services:
     restart: always
     networks:
       - internal_network
+      - external_network
 
   postgres:
     image: postgres:alpine
