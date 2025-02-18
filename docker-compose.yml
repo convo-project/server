@@ -38,26 +38,11 @@ services:
     networks:
       - internal_network
 
-  jenkins:
-    image: jenkins/jenkins:lts
-    container_name: jenkins
-    volumes:
-      - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 8080:8080
-    restart: always
-    networks:
-      - internal_network
-      - external_network
-
 volumes:
   redis-data:
     driver: local
   postgres-data:
     driver: local
-  jenkins_home:
-    external: true
 
 networks:
   internal_network:
