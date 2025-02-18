@@ -53,8 +53,9 @@ public class UsersService {
                 + "<div style='background-color: white; width: 400px; margin: auto; padding: 30px; border-radius: 10px; "
                 + "box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);'>"
                 + "<h1 style='font-size: 24px; color: #333;'>인증코드를 확인하세요.</h1>"
-                + "<p style='font-size: 16px; color: #555;'>아래 인증코드를 진행 중인 화면에 입력하여 인증을 완료해 주세요.</p>"
-                + "<div style='font-size: 32px; font-weight: bold; color: #007bff; margin: 20px 0;'>" + verifyCode
+                + "<p style='font-size: 16px; color: #555;'>아래 인증코드를 진행 중인 화면에 입력하여</p>"
+                + "<p style='font-size: 16px; color: #555;'>인증을 완료해 주세요.</p>"
+                + "<div style='font-size: 32px; font-weight: bold; color: #312E81; margin: 20px 0;'>" + verifyCode
                 + "</div>"
                 + "<p style='font-size: 14px; color: #666;'>• 인증코드는 발송된 시점부터 10분 동안 유효합니다.<br>"
                 + "• 유효시간 내 인증을 완료하지 않을 경우 재요청이 필요합니다.</p>"
