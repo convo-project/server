@@ -25,7 +25,7 @@ public class JwtTokenProvider {
     private final int refreshTokenExpiredTime;
     private final JwtParser jwtParser;
 
-    public JwtTokenProvider(@Value("${jwt.key}") String key,
+    public JwtTokenProvider(@Value("${jwt.secret}") String key,
                             @Value("${jwt.access-expired-time}") int accessTokenExpiredTime,
                             @Value("${jwt.refresh-expired-time}") int refreshTokenExpiredTime) {
         log.info(key);
