@@ -14,8 +14,6 @@ services:
   spring:
     container_name: convo
     image: qudwns017/convo
-    env_file:
-      - .env
     ports:
       - 8081:8080
     depends_on:
