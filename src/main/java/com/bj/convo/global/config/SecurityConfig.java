@@ -94,7 +94,7 @@ public class SecurityConfig {
     @Bean
     public UsernamePasswordFilter usernamePasswordLoginFilter() throws Exception {
         UsernamePasswordFilter usernamePasswordFilter = new UsernamePasswordFilter(
-                authenticationManager(), objectMapper, jwtTokenProvider);
+                authenticationManager(), objectMapper, jwtTokenProvider, redisUtil);
         usernamePasswordFilter.setAuthenticationManager(authenticationManager());
         return usernamePasswordFilter;
     }
