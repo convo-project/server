@@ -7,6 +7,7 @@ import com.bj.convo.global.security.filter.JwtFilter;
 import com.bj.convo.global.security.filter.UsernamePasswordFilter;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.security.service.UserDetailsServiceImpl;
+import com.bj.convo.global.util.redis.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +26,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +37,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UsersRepository usersRepository;
+    private final RedisUtil redisUtil;
 
     public final static String[] allowedUrls = {
             "/api/user/register",
@@ -62,9 +64,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .addFilterBefore(exceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(usernamePasswordLoginFilter(), ExceptionHandlerFilter.class)
+                .addFilterAfter(usernamePasswordLoginFilter(), SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(jwtFilter(), UsernamePasswordFilter.class)
+                .addFilterBefore(exceptionHandlerFilter(), JwtFilter.class)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(customAuthenticationEntryPoint()))
         ;
