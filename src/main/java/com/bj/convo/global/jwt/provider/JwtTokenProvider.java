@@ -12,6 +12,7 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.sasl.AuthenticationException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,13 +22,14 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider {
 
     private final SecretKey key;
-    private final int accessTokenExpiredTime;
-    private final int refreshTokenExpiredTime;
+    private final Long accessTokenExpiredTime;
+    @Getter
+    private final Long refreshTokenExpiredTime;
     private final JwtParser jwtParser;
 
     public JwtTokenProvider(@Value("${jwt.key}") String key,
-                            @Value("${jwt.access-expired-time}") int accessTokenExpiredTime,
-                            @Value("${jwt.refresh-expired-time}") int refreshTokenExpiredTime) {
+                            @Value("${jwt.access-expired-time}") Long accessTokenExpiredTime,
+                            @Value("${jwt.refresh-expired-time}") Long refreshTokenExpiredTime) {
         log.info(key);
         this.key = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8),
                 Jwts.SIG.HS256.key().build().getAlgorithm()

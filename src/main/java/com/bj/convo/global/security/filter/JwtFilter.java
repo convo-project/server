@@ -5,7 +5,10 @@ import com.bj.convo.domain.user.model.entity.Users;
 import com.bj.convo.domain.user.repository.UsersRepository;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.config.SecurityConfig;
+import com.bj.convo.global.security.exception.SecurityErrorCode;
 import com.bj.convo.global.security.service.UserDetailsImpl;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,12 +76,16 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private void forceAuthentication(String token) throws AuthenticationException {
-        Users user = getUsersFromToken(token);
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        try {
+            Users user = getUsersFromToken(token);
 
-        UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
-                userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info(authentication.getName());
+            UserDetailsImpl userDetails = new UserDetailsImpl(user);
+
+            UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
+                    userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (ExpiredJwtException e) {
+            throw new JwtException(SecurityErrorCode.EXPIRED_TOKEN.getMessage());
+        }
     }
 }

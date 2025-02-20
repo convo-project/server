@@ -5,6 +5,7 @@ import com.bj.convo.global.jwt.model.JwtToken;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.security.exception.SecurityErrorCode;
 import com.bj.convo.global.security.service.UserDetailsImpl;
+import com.bj.convo.global.util.redis.RedisUtil;
 import com.bj.convo.global.util.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -33,15 +34,17 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
     private static final String HTTP_METHOD_ERROR_MESSAGE = "POST 메소드 외에는 지원하지 않습니다.";
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisUtil redisUtil;
 
     private static final AntPathRequestMatcher LOGIN_REQUEST_MATCHER =
             new AntPathRequestMatcher(LOGIN_REQUEST_URL, HTTP_METHOD);
 
     public UsernamePasswordFilter(AuthenticationManager authenticationManager, ObjectMapper objectMapper,
-                                  JwtTokenProvider jwtTokenProvider) {
+                                  JwtTokenProvider jwtTokenProvider, RedisUtil redisUtil) {
         super(LOGIN_REQUEST_MATCHER, authenticationManager);
         this.objectMapper = objectMapper;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.redisUtil = redisUtil;
     }
 
     @Override
@@ -74,6 +77,10 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
 
         Cookie accessTokenCookie = new Cookie("access_token", jwtToken.getAccessToken());
         Cookie refreshTokenCookie = new Cookie("refresh_token", jwtToken.getRefreshToken());
+
+        String redisRefreshTokenPrefix = "refresh_token:" + userDetails.getUserId();
+
+        redisUtil.setData(redisRefreshTokenPrefix, refreshTokenCookie.getValue(), jwtTokenProvider.getRefreshTokenExpiredTime());
 
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setHttpOnly(true);
