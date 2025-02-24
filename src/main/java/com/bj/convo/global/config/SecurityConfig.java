@@ -26,8 +26,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.ExceptionTranslationFilter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
 @Configuration
@@ -68,9 +66,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterAfter(usernamePasswordLoginFilter(), SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(jwtFilter(), UsernamePasswordFilter.class)
-                .addFilterAfter(exceptionHandlerFilter(), JwtFilter.class)
-//                .exceptionHandling(e -> e
-//                        .authenticationEntryPoint(customAuthenticationEntryPoint()))
+                .addFilterBefore(exceptionHandlerFilter(), JwtFilter.class)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(customAuthenticationEntryPoint()))
         ;
 
         return http.build();

@@ -3,6 +3,7 @@ package com.bj.convo.global.jwt.provider;
 import com.bj.convo.global.jwt.model.JwtToken;
 import com.bj.convo.global.security.exception.SecurityErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -11,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.sasl.AuthenticationException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,23 +72,23 @@ public class JwtTokenProvider {
         return Long.parseLong(jwtParser.parseSignedClaims(token).getPayload().getSubject());
     }
 
-    public boolean validateToken(String token) throws AuthenticationException {
+    public boolean validateToken(String token) {
         try {
             jwtParser.parse(token);
             return true;
         } catch (Exception e) {
             if (e instanceof SignatureException) {
                 log.error(SecurityErrorCode.SIGNATURE_FAILED_TOKEN.getMessage());
-                throw new AuthenticationException(SecurityErrorCode.SIGNATURE_FAILED_TOKEN.getMessage());
+                throw new JwtException(SecurityErrorCode.SIGNATURE_FAILED_TOKEN.getMessage());
             } else if (e instanceof ExpiredJwtException) {
                 log.error(SecurityErrorCode.EXPIRED_TOKEN.getMessage());
-                throw new AuthenticationException(SecurityErrorCode.EXPIRED_TOKEN.getMessage());
+                throw new JwtException(SecurityErrorCode.EXPIRED_TOKEN.getMessage());
             } else if (e instanceof MalformedJwtException) {
                 log.error(SecurityErrorCode.MALFORMED_TOKEN.getMessage());
-                throw new AuthenticationException(SecurityErrorCode.MALFORMED_TOKEN.getMessage());
+                throw new JwtException(SecurityErrorCode.MALFORMED_TOKEN.getMessage());
             } else {
                 log.error(SecurityErrorCode.UNKNOWN_TOKEN_ERROR.getMessage());
-                throw new AuthenticationException(SecurityErrorCode.UNKNOWN_TOKEN_ERROR.getMessage());
+                throw new JwtException(SecurityErrorCode.UNKNOWN_TOKEN_ERROR.getMessage());
             }
         }
     }
