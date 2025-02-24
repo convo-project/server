@@ -5,7 +5,9 @@ import com.bj.convo.domain.user.model.entity.Users;
 import com.bj.convo.domain.user.repository.UsersRepository;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.config.SecurityConfig;
+import com.bj.convo.global.security.exception.SecurityErrorCode;
 import com.bj.convo.global.security.service.UserDetailsImpl;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,40 +47,36 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException, AuthenticationException {
         String token = resolveBearerToken(request);
 
-        try {
-            if (StringUtils.hasText(token) || jwtTokenProvider.validateToken(token)) {
-                forceAuthentication(token);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        if (jwtTokenProvider.validateToken(token)) {
+            forceAuthentication(token);
         }
+
         filterChain.doFilter(request, response);
     }
 
     private String resolveBearerToken(HttpServletRequest request) throws AuthenticationException {
         String bearerToken = request.getHeader("Authorization");
-        log.info(bearerToken);
+
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
             return bearerToken.substring(7);
         }
 
-        return null;
+        throw new JwtException(SecurityErrorCode.MALFORMED_TOKEN.getMessage());
     }
 
     private Users getUsersFromToken(String token) throws AuthenticationException {
         Long userId = jwtTokenProvider.getSubject(token);
 
         return usersRepository.findById(userId).orElseThrow(() ->
-                new AuthenticationException(UsersErrorCode.NOT_EXIST_USER.getMessage()));
+                new JwtException(UsersErrorCode.NOT_EXIST_USER.getMessage()));
     }
 
     private void forceAuthentication(String token) throws AuthenticationException {
-        Users user = getUsersFromToken(token);
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+            Users user = getUsersFromToken(token);
+            UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
-        UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
-                userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info(authentication.getName());
+            UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
+                    userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
