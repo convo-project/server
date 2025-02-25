@@ -50,7 +50,7 @@ public class JwtTokenProvider {
 
     private String generateAccessToken(Long userId) {
         return Jwts.builder()
-                .subject(userId.toString())
+                .claim("user_id", userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiredTime))
                 .subject("access_token")
@@ -60,7 +60,7 @@ public class JwtTokenProvider {
 
     private String generateRefreshToken(Long userId) {
         return Jwts.builder()
-                .subject(userId.toString())
+                .claim("user_id", userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiredTime))
                 .subject("refresh_token")
