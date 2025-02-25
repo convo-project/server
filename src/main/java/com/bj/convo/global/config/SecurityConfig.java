@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(CorsConfig.corsConfigurationSource()))
                 .addFilterAfter(usernamePasswordLoginFilter(), SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(jwtFilter(), UsernamePasswordFilter.class)
                 .addFilterBefore(exceptionHandlerFilter(), JwtFilter.class)
@@ -92,7 +93,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UsernamePasswordFilter usernamePasswordLoginFilter() throws Exception {
+    public UsernamePasswordFilter usernamePasswordLoginFilter() {
         UsernamePasswordFilter usernamePasswordFilter = new UsernamePasswordFilter(
                 authenticationManager(), objectMapper, jwtTokenProvider, redisUtil);
         usernamePasswordFilter.setAuthenticationManager(authenticationManager());
@@ -100,12 +101,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public ExceptionHandlerFilter exceptionHandlerFilter() throws Exception {
+    public ExceptionHandlerFilter exceptionHandlerFilter() {
         return new ExceptionHandlerFilter(objectMapper);
     }
 
     @Bean
-    public JwtFilter jwtFilter() throws Exception {
+    public JwtFilter jwtFilter() {
         return new JwtFilter(jwtTokenProvider, usersRepository);
     }
 
