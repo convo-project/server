@@ -53,7 +53,7 @@ public class JwtTokenProvider {
                 .subject(userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiredTime))
-                .claim("token_type", "access token")
+                .subject("access_token")
                 .signWith(key)
                 .compact();
     }
@@ -63,7 +63,7 @@ public class JwtTokenProvider {
                 .subject(userId.toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiredTime))
-                .claim("token_type", "refresh token")
+                .subject("refresh_token")
                 .signWith(key)
                 .compact();
     }
