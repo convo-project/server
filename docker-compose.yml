@@ -14,12 +14,11 @@ services:
   spring:
     container_name: convo
     image: qudwns017/convo
-    env_file:
-      - .env
     ports:
-      - 8081:8080
+      - 8080:8080
     depends_on:
       - redis
+      - postgres
     restart: always
     networks:
       - internal_network
@@ -43,10 +42,13 @@ services:
     container_name: nginx
     ports:
       - 80:80
+      - 443:443
     volumes:
-      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+      - ./conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
     depends_on:
-      - convo
+      - spring
     restart: always
     networks:
       - external_network
