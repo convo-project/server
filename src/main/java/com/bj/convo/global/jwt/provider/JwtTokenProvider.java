@@ -2,6 +2,7 @@ package com.bj.convo.global.jwt.provider;
 
 import com.bj.convo.global.jwt.model.JwtToken;
 import com.bj.convo.global.security.exception.SecurityErrorCode;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
@@ -68,14 +69,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Long getSubject(String token) {
-        return Long.parseLong(jwtParser.parseSignedClaims(token).getPayload().getSubject());
-    }
-
-    public boolean validateToken(String token) {
+    public Claims getPayload(String token) {
         try {
-            jwtParser.parse(token);
-            return true;
+            return jwtParser.parseSignedClaims(token).getPayload();
         } catch (Exception e) {
             if (e instanceof SignatureException) {
                 log.error(SecurityErrorCode.SIGNATURE_FAILED_TOKEN.getMessage());
