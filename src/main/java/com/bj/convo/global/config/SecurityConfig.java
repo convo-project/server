@@ -58,7 +58,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(allowedUrls).permitAll()// 임시
+                        .requestMatchers(allowedUrls).permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
@@ -107,7 +107,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtFilter jwtFilter() {
-        return new JwtFilter(jwtTokenProvider, usersRepository);
+        return new JwtFilter(jwtTokenProvider, usersRepository, redisUtil);
     }
 
     @Bean

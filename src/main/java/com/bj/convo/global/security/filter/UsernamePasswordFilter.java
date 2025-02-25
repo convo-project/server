@@ -51,8 +51,6 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
             throws AuthenticationException, IOException, ServletException {
         String method = request.getMethod();
 
-        log.info("Start JwtFilter");
-
         if (!method.equals("POST")) {
             throw new HttpRequestMethodNotSupportedException(HTTP_METHOD_ERROR_MESSAGE);
         }
@@ -70,7 +68,7 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
+                                            Authentication authResult) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
         JwtToken jwtToken = jwtTokenProvider.generateToken(userDetails.getUserId());
 
@@ -83,29 +81,25 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
 
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setHttpOnly(true);
-        // TODO: https 설정 이후
-//        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setSecure(true);
 
         accessTokenCookie.setPath("/");
         accessTokenCookie.setHttpOnly(true);
-//        refreshTokenCookie.setSecure(true);
+        accessTokenCookie.setSecure(true);
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
         response.setStatus(200);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(jwtToken));
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                              AuthenticationException failed) throws IOException, ServletException {
+                                              AuthenticationException failed) throws IOException {
         ErrorResponse error = ErrorResponse.builder()
                 .code(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                 .message(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getMessage())
                 .build();
-        log.error("로그인 실패");
+
         response.setStatus(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getHttpStatus().value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
