@@ -72,7 +72,6 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
         UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
         JwtToken jwtToken = jwtTokenProvider.generateToken(userDetails.getUserId());
 
-        Cookie accessTokenCookie = new Cookie("access_token", jwtToken.getAccessToken());
         Cookie refreshTokenCookie = new Cookie("refresh_token", jwtToken.getRefreshToken());
 
         String redisRefreshTokenPrefix = "refresh_token:" + userDetails.getUserId();
@@ -83,11 +82,7 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true);
 
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(true);
-
-        response.addCookie(accessTokenCookie);
+        response.setHeader("Authorization", "Bearer " + jwtToken.getAccessToken());
         response.addCookie(refreshTokenCookie);
         response.setStatus(200);
     }

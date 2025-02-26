@@ -51,11 +51,15 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String token = resolveBearerToken(request);
-        Claims payload = jwtTokenProvider.getPayload(token);
-        String tokenType = payload.getSubject();
 
         if (pathMatcher.match(REISSUE_REQUEST_URL, request.getRequestURI())) {
+            String token = getRefreshTokenFromCookie(request);
+            Claims payload = jwtTokenProvider.getPayload(token);
+            if (!token.equals(redisUtil.getData("refresh_token:" + payload.get("user_id", String.class)))) {
+                throw new JwtException(SecurityErrorCode.ALREADY_LOGOUT_USER.getMessage());
+            }
+            String tokenType = payload.getSubject();
+
             if (tokenType.equals("refresh_token")) {
                 reissueAccessToken(Long.parseLong(payload.get("user_id", String.class)), response);
             } else {
@@ -63,6 +67,10 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
         } else {
+            String token = resolveBearerToken(request);
+            Claims payload = jwtTokenProvider.getPayload(token);
+            String tokenType = payload.getSubject();
+
             if (tokenType.equals("access_token")) {
                 forceAuthentication(payload);
                 filterChain.doFilter(request, response);
@@ -107,23 +115,31 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private void setResponse(HttpServletResponse response, Long userId, JwtToken jwtToken) {
-        Cookie accessTokenCookie = new Cookie("access_token", jwtToken.getAccessToken());
         Cookie refreshTokenCookie = new Cookie("refresh_token", jwtToken.getRefreshToken());
 
         String redisRefreshTokenPrefix = "refresh_token:" + userId;
 
-        redisUtil.setData(redisRefreshTokenPrefix, refreshTokenCookie.getValue(), jwtTokenProvider.getRefreshTokenExpiredTime());
+        redisUtil.setData(redisRefreshTokenPrefix, refreshTokenCookie.getValue(),
+                jwtTokenProvider.getRefreshTokenExpiredTime());
 
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true);
 
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(true);
-
-        response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
+        response.setHeader("Authorization", "Bearer " + jwtToken.getAccessToken());
+
         response.setStatus(200);
+    }
+
+    private String getRefreshTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        throw new JwtException(SecurityErrorCode.MALFORMED_TOKEN.getMessage());
     }
 }

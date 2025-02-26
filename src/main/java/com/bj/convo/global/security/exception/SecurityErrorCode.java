@@ -12,6 +12,7 @@ public enum SecurityErrorCode {
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     UNKNOWN_TOKEN_ERROR(HttpStatus.UNAUTHORIZED, "토큰 파싱 중 에러가 발생했습니다."),
     MALFORMED_TOKEN(HttpStatus.UNAUTHORIZED, "손상된 토큰입니다."),
+    ALREADY_LOGOUT_USER(HttpStatus.UNAUTHORIZED, "이미 로그아웃 한 유저입니다."),
     ;
 
     private final HttpStatus httpStatus;
