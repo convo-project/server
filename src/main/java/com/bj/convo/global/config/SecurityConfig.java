@@ -6,7 +6,8 @@ import com.bj.convo.global.security.filter.ExceptionHandlerFilter;
 import com.bj.convo.global.security.filter.JwtFilter;
 import com.bj.convo.global.security.filter.UsernamePasswordFilter;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
-import com.bj.convo.global.security.service.UserDetailsServiceImpl;
+import com.bj.convo.global.security.service.CustomOAuth2UserService;
+import com.bj.convo.global.security.service.CustomUserDetailsService;
 import com.bj.convo.global.util.redis.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
@@ -34,10 +35,11 @@ import org.springframework.security.web.servletapi.SecurityContextHolderAwareReq
 public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UsersRepository usersRepository;
     private final RedisUtil redisUtil;
+    private final CustomOAuth2UserService oAuth2UserService;
 
     public final static String[] allowedUrls = {
             "/api/user/register",
@@ -48,7 +50,9 @@ public class SecurityConfig {
             "/swagger-resources/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/v3/api-docs"
+            "/v3/api-docs",
+            "/oauth2/authorization/**",
+            "/login/oauth2/code/**"
     };
 
     @Value("${spring.security.debug:false}")
@@ -68,6 +72,9 @@ public class SecurityConfig {
                 .addFilterAfter(usernamePasswordLoginFilter(), SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(jwtFilter(), UsernamePasswordFilter.class)
                 .addFilterBefore(exceptionHandlerFilter(), JwtFilter.class)
+                .oauth2Login(oAuth2LoginConfigurer -> oAuth2LoginConfigurer
+                        .userInfoEndpoint(userInfoEndpointConfigurer -> userInfoEndpointConfigurer
+                                .userService(oAuth2UserService)))
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(customAuthenticationEntryPoint()))
         ;

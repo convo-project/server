@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     private final UsersRepository usersRepository;
 
@@ -19,6 +19,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Users users = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("아이디가 존재하지 않습니다."));
 
-        return new UserDetailsImpl(users);
+        return new CustomUserDetails(users);
     }
 }

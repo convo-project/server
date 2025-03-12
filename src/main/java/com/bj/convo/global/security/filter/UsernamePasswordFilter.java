@@ -4,7 +4,7 @@ import com.bj.convo.domain.user.model.dto.request.LoginRequest;
 import com.bj.convo.global.jwt.model.JwtToken;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.security.exception.SecurityErrorCode;
-import com.bj.convo.global.security.service.UserDetailsImpl;
+import com.bj.convo.global.security.service.CustomUserDetails;
 import com.bj.convo.global.util.redis.RedisUtil;
 import com.bj.convo.global.util.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,7 +69,7 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
         JwtToken jwtToken = jwtTokenProvider.generateToken(userDetails.getUserId());
 
         Cookie refreshTokenCookie = new Cookie("refresh_token", jwtToken.getRefreshToken());

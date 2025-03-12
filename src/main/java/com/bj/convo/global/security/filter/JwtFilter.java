@@ -7,7 +7,7 @@ import com.bj.convo.global.jwt.model.JwtToken;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.config.SecurityConfig;
 import com.bj.convo.global.security.exception.SecurityErrorCode;
-import com.bj.convo.global.security.service.UserDetailsImpl;
+import com.bj.convo.global.security.service.CustomUserDetails;
 import com.bj.convo.global.util.redis.RedisUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -92,7 +92,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private void forceAuthentication(Claims payload) {
         Users user = getUsersFromPayload(payload);
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        CustomUserDetails userDetails = new CustomUserDetails(user);
 
         UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
                 userDetails, null, userDetails.getAuthorities());
