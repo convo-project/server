@@ -9,7 +9,7 @@ spring:
     password: ${PSQL_PASSWORD}
 
   security:
-    debug: true
+    debug: false
     oauth2:
       client:
         registration:
