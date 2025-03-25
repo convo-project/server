@@ -6,13 +6,15 @@ public record RegisterRequest(
         String email,
         String password,
         String nickname,
-        boolean isVerified
+        boolean isVerified,
+        String provider
 ) {
     public Users toEntity(String encryptedPassword) {
         return Users.builder()
                 .nickname(nickname)
                 .email(email)
                 .encryptedPassword(encryptedPassword)
+                .provider("LOCAL")
                 .build();
     }
 }

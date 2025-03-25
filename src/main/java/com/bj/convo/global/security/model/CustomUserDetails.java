@@ -1,4 +1,4 @@
-package com.bj.convo.global.security.service;
+package com.bj.convo.global.security.model;
 
 import com.bj.convo.domain.user.model.entity.Users;
 import java.util.ArrayList;

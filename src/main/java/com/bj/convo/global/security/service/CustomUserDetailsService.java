@@ -2,6 +2,7 @@ package com.bj.convo.global.security.service;
 
 import com.bj.convo.domain.user.model.entity.Users;
 import com.bj.convo.domain.user.repository.UsersRepository;
+import com.bj.convo.global.security.model.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

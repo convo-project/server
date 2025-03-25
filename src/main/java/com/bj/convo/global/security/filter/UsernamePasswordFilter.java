@@ -4,14 +4,14 @@ import com.bj.convo.domain.user.model.dto.request.LoginRequest;
 import com.bj.convo.global.jwt.model.JwtToken;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.security.exception.SecurityErrorCode;
-import com.bj.convo.global.security.service.CustomUserDetails;
+import com.bj.convo.global.security.model.CustomUserDetails;
+import com.bj.convo.global.util.cookie.CookieUtil;
 import com.bj.convo.global.util.redis.RedisUtil;
 import com.bj.convo.global.util.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -72,18 +72,15 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
         CustomUserDetails userDetails = (CustomUserDetails) authResult.getPrincipal();
         JwtToken jwtToken = jwtTokenProvider.generateToken(userDetails.getUserId());
 
-        Cookie refreshTokenCookie = new Cookie("refresh_token", jwtToken.getRefreshToken());
+        String redisRefreshTokenName = "refresh_token:" + userDetails.getUserId();
 
-        String redisRefreshTokenPrefix = "refresh_token:" + userDetails.getUserId();
-
-        redisUtil.setData(redisRefreshTokenPrefix, refreshTokenCookie.getValue(), jwtTokenProvider.getRefreshTokenExpiredTime());
-
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
+        redisUtil.setData(redisRefreshTokenName, jwtToken.getRefreshToken(),
+                jwtTokenProvider.getRefreshTokenExpiredTime());
 
         response.setHeader("Authorization", "Bearer " + jwtToken.getAccessToken());
-        response.addCookie(refreshTokenCookie);
+
+        CookieUtil.addCookie(response, "refresh_token", jwtToken.getRefreshToken(),
+                (int) (jwtTokenProvider.getRefreshTokenExpiredTime() / 1000));
         response.setStatus(200);
     }
 

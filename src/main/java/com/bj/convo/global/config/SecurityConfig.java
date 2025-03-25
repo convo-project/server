@@ -6,8 +6,11 @@ import com.bj.convo.global.security.filter.ExceptionHandlerFilter;
 import com.bj.convo.global.security.filter.JwtFilter;
 import com.bj.convo.global.security.filter.UsernamePasswordFilter;
 import com.bj.convo.global.jwt.provider.JwtTokenProvider;
+import com.bj.convo.global.security.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.bj.convo.global.security.service.CustomOAuth2UserService;
 import com.bj.convo.global.security.service.CustomUserDetailsService;
+import com.bj.convo.global.security.service.OAuth2FailureHandler;
+import com.bj.convo.global.security.service.OAuth2SuccessHandler;
 import com.bj.convo.global.util.redis.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
@@ -27,6 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
 @Configuration
@@ -40,6 +44,9 @@ public class SecurityConfig {
     private final UsersRepository usersRepository;
     private final RedisUtil redisUtil;
     private final CustomOAuth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository oauth2requestRepository;
 
     public final static String[] allowedUrls = {
             "/api/user/register",
@@ -52,7 +59,9 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/v3/api-docs",
             "/oauth2/authorization/**",
-            "/login/oauth2/code/**"
+            "/login/oauth2/code/**",
+            "/favicon.ico",
+            "/login?error"
     };
 
     @Value("${spring.security.debug:false}")
@@ -71,8 +80,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(CorsConfig.corsConfigurationSource()))
                 .addFilterAfter(usernamePasswordLoginFilter(), SecurityContextHolderAwareRequestFilter.class)
                 .addFilterAfter(jwtFilter(), UsernamePasswordFilter.class)
-                .addFilterBefore(exceptionHandlerFilter(), JwtFilter.class)
+                .addFilterBefore(exceptionHandlerFilter(), LogoutFilter.class)
                 .oauth2Login(oAuth2LoginConfigurer -> oAuth2LoginConfigurer
+                        .authorizationEndpoint(authorizationEndpointConfigurer ->
+                                authorizationEndpointConfigurer.baseUri("/oauth2/authorization")
+                                        .authorizationRequestRepository(oauth2requestRepository))
+                        .failureHandler(oAuth2FailureHandler)
+                        .successHandler(oAuth2SuccessHandler)
                         .userInfoEndpoint(userInfoEndpointConfigurer -> userInfoEndpointConfigurer
                                 .userService(oAuth2UserService)))
                 .exceptionHandling(e -> e

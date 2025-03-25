@@ -27,6 +27,15 @@ public class Users extends BaseEntity {
     @Column(length = 100, nullable = false)
     private String encryptedPassword;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 40, nullable = false)
     private String nickname;
+
+    @Column(length = 10, nullable = false)
+    private String provider;
+
+    public Users updateProvider(String provider) {
+        this.provider = provider;
+
+        return this;
+    }
 }
