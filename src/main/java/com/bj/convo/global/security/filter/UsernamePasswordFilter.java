@@ -92,6 +92,8 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
                 .message(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getMessage())
                 .build();
 
+        log.error("{}", request.isSecure());
+
         response.setStatus(SecurityErrorCode.NOT_EXIST_EMAIL_OR_PASSWORD.getHttpStatus().value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
