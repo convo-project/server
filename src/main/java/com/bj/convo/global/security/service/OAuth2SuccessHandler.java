@@ -64,6 +64,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             String normalizedTargetUrl = uri.getScheme() + "://" + uri.getHost() + (uri.getPort() == -1 ? "" : ":" + uri.getPort());
 
             if (!Arrays.asList(allowedDomain).contains(normalizedTargetUrl)) {
+                //TODO:
                 throw new IllegalArgumentException("허용되지 않은 리다이렉트 URI입니다: " + targetUrl);
             }
 
