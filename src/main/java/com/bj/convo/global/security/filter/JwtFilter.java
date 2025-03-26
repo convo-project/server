@@ -8,6 +8,7 @@ import com.bj.convo.global.jwt.provider.JwtTokenProvider;
 import com.bj.convo.global.config.SecurityConfig;
 import com.bj.convo.global.security.exception.SecurityErrorCode;
 import com.bj.convo.global.security.model.CustomUserDetails;
+import com.bj.convo.global.util.cookie.CookieUtil;
 import com.bj.convo.global.util.redis.RedisUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -114,19 +115,15 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private void setResponse(HttpServletResponse response, Long userId, JwtToken jwtToken) {
-        Cookie refreshTokenCookie = new Cookie("refresh_token", jwtToken.getRefreshToken());
-
         String redisRefreshTokenPrefix = "refresh_token:" + userId;
 
-        redisUtil.setData(redisRefreshTokenPrefix, refreshTokenCookie.getValue(),
+        redisUtil.setData(redisRefreshTokenPrefix, jwtToken.getRefreshToken(),
                 jwtTokenProvider.getRefreshTokenExpiredTime());
 
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-
-        response.addCookie(refreshTokenCookie);
         response.setHeader("Authorization", "Bearer " + jwtToken.getAccessToken());
+
+        CookieUtil.addCookie(response, "refresh_token", jwtToken.getRefreshToken(),
+                (int) (jwtTokenProvider.getRefreshTokenExpiredTime() / 1000));
 
         response.setStatus(200);
     }
