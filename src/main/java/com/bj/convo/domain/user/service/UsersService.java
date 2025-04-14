@@ -12,6 +12,7 @@ import jakarta.mail.MessagingException;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -100,5 +101,9 @@ public class UsersService {
         }
 
         return sb.toString();
+    }
+
+    public void test(UserDetails user) {
+        log.info("User ID: {}", user.getUsername());
     }
 }

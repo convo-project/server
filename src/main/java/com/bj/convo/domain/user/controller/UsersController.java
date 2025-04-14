@@ -2,10 +2,13 @@ package com.bj.convo.domain.user.controller;
 
 import com.bj.convo.domain.user.model.dto.request.RegisterRequest;
 import com.bj.convo.domain.user.model.dto.request.VerifyEmailRequest;
+import com.bj.convo.domain.user.model.entity.Users;
 import com.bj.convo.domain.user.service.UsersService;
 import com.bj.convo.global.util.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +25,8 @@ public class UsersController implements SwaggerUsersController {
 
     // TODO: 인증 필요 확인용 테스트 API
     @GetMapping("/test")
-    public ResponseEntity<?> test() {
+    public ResponseEntity<?> test(@AuthenticationPrincipal UserDetails user) {
+        usersService.test(user);
         return ApiResponse.NO_CONTENT();
     }
 

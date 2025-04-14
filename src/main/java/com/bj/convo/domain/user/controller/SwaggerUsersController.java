@@ -2,11 +2,14 @@ package com.bj.convo.domain.user.controller;
 
 import com.bj.convo.domain.user.model.dto.request.RegisterRequest;
 import com.bj.convo.domain.user.model.dto.request.VerifyEmailRequest;
+import com.bj.convo.domain.user.model.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -17,7 +20,7 @@ public interface SwaggerUsersController {
             @ApiResponse(responseCode = "204", description = "접근 성공"),
             @ApiResponse(responseCode = "401", description = "접근 실패")
     })
-    ResponseEntity<?> test();
+    ResponseEntity<?> test(@AuthenticationPrincipal UserDetails user);
 
     @Operation(summary = "회원가입", description = "OAuth가 아닌 일반 사용자 가입하는 API")
     ResponseEntity<?> register(@RequestBody RegisterRequest req);

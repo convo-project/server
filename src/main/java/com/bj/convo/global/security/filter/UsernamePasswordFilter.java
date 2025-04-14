@@ -78,6 +78,7 @@ public class UsernamePasswordFilter extends AbstractAuthenticationProcessingFilt
                 jwtTokenProvider.getRefreshTokenExpiredTime());
 
         response.setHeader("Authorization", "Bearer " + jwtToken.getAccessToken());
+        log.info("Access Token: {}", jwtToken.getAccessToken());
 
         CookieUtil.addCookie(response, "refresh_token", jwtToken.getRefreshToken(),
                 (int) (jwtTokenProvider.getRefreshTokenExpiredTime() / 1000));
