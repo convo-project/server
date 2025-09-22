@@ -54,11 +54,11 @@ jib {
     }
     to {
         tags = ['latest']
-        if (project.hasProperty('jibUsername') && project.hasProperty('jibPassword')) {
-            auth {
-                username = jibUsername
-                password = jibPassword
-            }
-        }
+//        if (project.hasProperty('jibUsername') && project.hasProperty('jibPassword')) {
+//            auth {
+//                username = jibUsername
+//                password = jibPassword
+//            }
+//        }
     }
 }
